@@ -22,7 +22,7 @@ default['jetty']['home'] = '/usr/share/jetty'
 default['jetty']['port'] = 8080
 # The default arguments to pass to jetty.
 default['jetty']['args'] = []
-default['jetty']['logs'] = '/var/log/jetty'
+default['jetty']['logs'] = "#{default['jetty']['home']}/logs"
 # Extra options to pass to the JVM
 default['jetty']['java_options'] = []
 
