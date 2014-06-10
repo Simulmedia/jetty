@@ -7,7 +7,7 @@ describe "hipsnip-jetty::default" do
 		expect(chef_run).to include_recipe 'hipsnip-jetty::default'
 	end
 	it "should create the folders necessary for jetty" do
-		[node['jetty']['home'], node['jetty']['contexts'], node['jetty']['webapps'], "#{node['jetty']['home']}/lib","#{node['jetty']['home']}/resources"].each do |path|
+		[node['jetty']['home'], node['jetty']['base']].each do |path|
 			expect(chef_run).to create_directory path
 			directory = chef_run.directory(path)
 			expect(directory).to be_owned_by(node['jetty']['user'], node['jetty']['group'])
@@ -22,30 +22,13 @@ describe "hipsnip-jetty::default" do
 	it "should execute ruby block 'Extract Jetty'" do
 		expect(chef_run).to execute_ruby_block 'Extract Jetty'
 	end
-	it "should execute ruby block 'Copy Jetty lib files'" do
-		expect(chef_run).to execute_ruby_block 'Copy Jetty lib files'
+	it "should execute ruby block 'Copy Jetty files to jetty home'" do
+		expect(chef_run).to execute_ruby_block 'Copy Jetty files to jetty home'
 	end
-	it "should execute ruby block 'Copy Jetty start.jar'" do
-		expect(chef_run).to execute_ruby_block 'Copy Jetty start.jar'
+	it "should execute ruby block 'Create new jetty base'" do
+		expect(chef_run).to execute_ruby_block 'Create new jetty base'
 	end
-	it "should execute ruby block 'Copy Jetty init file (jetty.sh)'" do
-		expect(chef_run).to execute_ruby_block 'Copy Jetty init file (jetty.sh)'
-	end
-	it "should create the folder /etc/jetty" do
-		path = '/etc/jetty'
-		expect(chef_run).to create_directory path
-		directory = chef_run.directory(path)
-		expect(directory).to be_owned_by(node['jetty']['user'], node['jetty']['group'])
-	end
-	it "should create the folder #{node['jetty']['home']}/start.d" do
-		path = "#{node['jetty']['home']}/start.d"
-		expect(chef_run).to create_directory path
-		directory = chef_run.directory(path)
-		expect(directory).to be_owned_by(node['jetty']['user'], node['jetty']['group'])
-	end
-	it "should execute ruby block 'Copy Jetty config files'" do
-		expect(chef_run).to execute_ruby_block 'Copy Jetty config files'
-	end
+
 	it "should create the file /etc/default/jetty" do
 		path = '/etc/default/jetty';
 		expect(chef_run).to create_file path
