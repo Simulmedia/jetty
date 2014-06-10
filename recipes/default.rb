@@ -117,6 +117,13 @@ ruby_block 'Copy Jetty files to jetty home' do
   end
 end
 
+directory node['jetty']['base'] do
+  owner node['jetty']['user']
+  group node['jetty']['group']
+  mode '755'
+  action :create
+end
+
 ruby_block 'Create new jetty base' do
   block do
     Chef::Log.info "Creating new jetty base at #{node['jetty']['base']}"
@@ -185,14 +192,14 @@ template "/etc/jetty.conf" do
   notifies :restart, "service[jetty]"
 end
 
-if node['jetty']['start_ini']['custom']
-  template "#{node['jetty']['base']}/start.ini" do
-    source "start.ini.erb"
-    mode   '644'
-    owner node['jetty']['user']
-    group node['jetty']['group']
-    notifies :restart, "service[jetty]"
-  end
+template "#{node['jetty']['base']}/start.ini" do
+  source "start.ini.erb"
+  mode   '644'
+  owner node['jetty']['user']
+  group node['jetty']['group']
+  notifies :restart, "service[jetty]"
+
+  only_if { node['jetty']['start_ini']['custom'] }
 end
 
 ################################################################################
