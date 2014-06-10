@@ -177,7 +177,7 @@ template '/etc/default/jetty' do
 end
 
 
-template "#{node['jetty']['base']}/jetty.conf" do
+template "/etc/jetty.conf" do
   source "jetty.conf.erb"
   mode   '644'
   owner node['jetty']['user']
