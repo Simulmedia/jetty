@@ -101,35 +101,36 @@ ruby_block 'Extract Jetty' do
 end
 
 
-ruby_block 'Copy Jetty lib files' do
+ruby_block 'Copy Jetty files to jetty home' do
   block do
     Chef::Log.info "Copying Jetty lib files into #{node['jetty']['home']}"
-    FileUtils.cp_r File.join(node['jetty']['extracted'], 'lib', ''), node['jetty']['home']
-    FileUtils.chown_R(node['jetty']['user'],node['jetty']['group'],File.join(node['jetty']['home'], 'lib', ''))
-    raise "Failed to copy Jetty libraries" if Dir[File.join(node['jetty']['home'], 'lib', '*')].empty?
+    FileUtils.cp_r node['jetty']['extracted'], node['jetty']['home']
+    FileUtils.chown_R(node['jetty']['user'],node['jetty']['group'],node['jetty']['home'])
+    `export JETTY_HOME=#{node['jetty']['home']}`
+    raise "Failed to copy Jetty files to jetty home" if Dir[node['jetty']['home']].empty?
   end
 
   action :create
 
   only_if do
-    Dir[File.join(node['jetty']['home'], 'lib', '*')].empty?
+    Dir[node['jetty']['home']].empty?
   end
 end
 
-
-ruby_block 'Copy Jetty start.jar' do
+ruby_block 'Create new jetty base' do
   block do
-    Chef::Log.info "Copying Jetty start.jar into #{node['jetty']['home']}"
-
-    FileUtils.cp File.join(node['jetty']['extracted'], 'start.jar'), node['jetty']['home']
-    FileUtils.chown_R(node['jetty']['user'],node['jetty']['group'],File.join(node['jetty']['home'], 'start.jar'))
-    raise "Failed to copy Jetty start.jar" unless File.exists?(File.join(node['jetty']['home'], 'start.jar'))
+    Chef::Log.info "Creating new jetty base at #{node['jetty']['base']}"
+    `cd #{node['jetty']['base']}`
+    `java -jar #{node['jetty']['home']}/start.jar --add-to-startd=http,deploy`
+    FileUtils.chown_R(node['jetty']['user'],node['jetty']['group'],node['jetty']['base'])
+    `export JETTY_BASE=#{node['jetty']['base']}`
+    raise "Failed to create new jetty base" if Dir[node['jetty']['base']].empty?
   end
 
   action :create
 
-  not_if do
-    File.exists?(File.join(node['jetty']['home'], 'start.jar'))
+  only_if do
+    Dir[node['jetty']['base']].empty?
   end
 end
 
@@ -166,41 +167,6 @@ end
 ################################################################################
 # Jetty Config
 
-directory "/etc/jetty" do
-  mode '755'
-  owner node['jetty']['user']
-  group node['jetty']['group']
-end
-
-directory "#{node['jetty']['home']}/start.d" do
-  mode '755'
-  owner node['jetty']['user']
-  group node['jetty']['group']
-end
-
-link "#{node['jetty']['home']}/etc" do
-  to "/etc/jetty"
-  owner node['jetty']['user']
-  group node['jetty']['group']
-end
-
-ruby_block 'Copy Jetty config files' do
-  block do
-    Chef::Log.info "Copying Jetty config files into #{node['jetty']['home']}/etc"
-
-    FileUtils.cp_r File.join(node['jetty']['extracted'], 'etc', ''), node['jetty']['home']
-    FileUtils.remove_file(File.join(node['jetty']['home'], 'etc', 'jetty.conf'), true)
-    FileUtils.chown_R(node['jetty']['user'],node['jetty']['group'],File.join(node['jetty']['home'], 'etc', ''))
-    raise "Failed to copy Jetty config files" if Dir[File.join(node['jetty']['home'], 'etc', '*')].empty?
-  end
-
-  action :create
-
-  only_if do
-    Dir[File.join(node['jetty']['home'], 'etc', '*')].empty?
-  end
-end
-
 template '/etc/default/jetty' do
   source 'jetty.default.erb'
   mode   '644'
@@ -211,7 +177,7 @@ template '/etc/default/jetty' do
 end
 
 
-template "/etc/jetty/jetty.conf" do
+template "#{node['jetty']['base']}/jetty.conf" do
   source "jetty.conf.erb"
   mode   '644'
   owner node['jetty']['user']
@@ -220,16 +186,8 @@ template "/etc/jetty/jetty.conf" do
 end
 
 if node['jetty']['start_ini']['custom']
-  template "#{node['jetty']['home']}/start.ini" do
+  template "#{node['jetty']['base']}/start.ini" do
     source "start.ini.erb"
-    mode   '644'
-    owner node['jetty']['user']
-    group node['jetty']['group']
-    notifies :restart, "service[jetty]"
-  end
-else
-  cookbook_file "#{node['jetty']['home']}/start.ini" do
-    source "jetty-#{version}-start.ini"
     mode   '644'
     owner node['jetty']['user']
     group node['jetty']['group']
