@@ -63,7 +63,8 @@ end
 # Create few directories for jetty
 
 
-[node['jetty']['home'], node['jetty']['contexts'], node['jetty']['webapps'], "#{node['jetty']['home']}/lib","#{node['jetty']['home']}/resources"].each do |d|
+#[node['jetty']['home'], node['jetty']['contexts'], node['jetty']['webapps'], "#{node['jetty']['home']}/lib","#{node['jetty']['home']}/resources"].each do |d|
+[node['jetty']['home']].each do |d|
   directory d do
     owner node['jetty']['user']
     group node['jetty']['group']
@@ -104,7 +105,7 @@ end
 ruby_block 'Copy Jetty files to jetty home' do
   block do
     Chef::Log.info "Copying Jetty lib files into #{node['jetty']['home']}"
-    FileUtils.cp_r node['jetty']['extracted'], node['jetty']['home']
+    FileUtils.cp_r node['jetty']['extracted'] + '/', node['jetty']['home']
     FileUtils.chown_R(node['jetty']['user'],node['jetty']['group'],node['jetty']['home'])
     `export JETTY_HOME=#{node['jetty']['home']}`
     raise "Failed to copy Jetty files to jetty home" if Dir[node['jetty']['home']].empty?
@@ -113,10 +114,18 @@ ruby_block 'Copy Jetty files to jetty home' do
   action :create
 
   only_if do
-    Dir["#{node['jetty']['home']}/lib"].empty?
+    Dir[node['jetty']['home']].empty?
   end
 end
 
+[node['jetty']['contexts'], node['jetty']['webapps'], "#{node['jetty']['home']}/lib","#{node['jetty']['home']}/resources"].each do |d|
+  directory d do
+    owner node['jetty']['user']
+    group node['jetty']['group']
+    mode  '755'
+  end
+end
+ 
 directory node['jetty']['base'] do
   owner node['jetty']['user']
   group node['jetty']['group']
