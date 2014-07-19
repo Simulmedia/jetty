@@ -113,7 +113,7 @@ ruby_block 'Copy Jetty files to jetty home' do
   action :create
 
   only_if do
-    Dir[node['jetty']['home']].empty?
+    Dir["#{node['jetty']['home']}/lib"].empty?
   end
 end
 

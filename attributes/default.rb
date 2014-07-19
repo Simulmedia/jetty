@@ -19,7 +19,7 @@
 default['jetty']['user'] = 'jetty'
 default['jetty']['group'] = 'jetty'
 default['jetty']['home'] = '/usr/share/jetty'
-default['jetty']['base'] = '/usr/share/jetty-base'
+default['jetty']['base'] = '/usr/share/jetty'
 default['jetty']['port'] = 8080
 # The default arguments to pass to jetty.
 default['jetty']['args'] = []
