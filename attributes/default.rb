@@ -30,9 +30,9 @@ default['jetty']['java_options'] = []
 # e.g: ['etc/jetty-webapps.xml', 'etc/jetty-http.xml']
 default['jetty']['add_confs'] = []
 
-default['jetty']['version'] = '9.1.5.v20140505'
-default['jetty']['link'] = 'http://jetty-cookbook.s3.amazonaws.com/jetty-distribution-9.1.5.v20140505.tar.gz'
-default['jetty']['checksum'] = '3fbce5530d8d9a66f43034782b0f249df3d98e3e97ef849e7f740eab612b963f' # SHA256
+default['jetty']['version'] = '9.2.1.v20140609'
+default['jetty']['link'] = 'http://eclipse.org/downloads/download.php?file=/jetty/9.2.1.v20140609/dist/jetty-distribution-9.2.1.v20140609.tar.gz&r=1'
+default['jetty']['checksum'] = '1d784f556ae998ea6e48547e4db079367df87ab0'
 
 default['jetty']['directory'] = '/usr/local/src'
 
