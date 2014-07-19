@@ -105,17 +105,18 @@ end
 ruby_block 'Copy Jetty files to jetty home' do
   block do
     Chef::Log.info "Copying Jetty lib files into #{node['jetty']['home']}"
-    FileUtils.cp_r node['jetty']['extracted'] + '/', node['jetty']['home']
+    FileUtils.cp_r node['jetty']['extracted'] + '/.', node['jetty']['home']
     FileUtils.chown_R(node['jetty']['user'],node['jetty']['group'],node['jetty']['home'])
-    `export JETTY_HOME=#{node['jetty']['home']}`
+    #`export JETTY_HOME=#{node['jetty']['home']}`
     raise "Failed to copy Jetty files to jetty home" if Dir[node['jetty']['home']].empty?
   end
 
   action :create
 
-  only_if do
-    Dir[node['jetty']['home']].empty?
-  end
+#  only_if do
+#    #Dir[node['jetty']['home']].empty?
+#    File.exists?(node['jetty']['home']+'/lib')
+#  end
 end
 
 [node['jetty']['contexts'], node['jetty']['webapps'], "#{node['jetty']['home']}/lib","#{node['jetty']['home']}/resources"].each do |d|
